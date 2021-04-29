@@ -20,13 +20,24 @@ def get_text(path): # Получаем данные из PDF
         for page in pdf.pages:
             text = page.extract_text()
 
+            triger = 0
+
             for line in text.split('\n'):
+
+                if triger == 1:
+                    triger = 0
+                    all_dogovor[-1] = all_dogovor[-1] + ' ' + line
+
+                    all_data.append(all_dogovor)  # Добавляем в результирующий список - список с данными о договоре
+                    dogovor += 1
+
 
                 kadastr_nomer = re.search(r'Кадастровый номер:', line)
                 rekviziti = re.search(r'реквизиты договора:', line)
                 data_gos_reg = re.search(r'дата государственной регистрации:', line)
                 nomer_gos_reg = re.search(r'номер государственной регистрации:', line)
                 object_dole_stroit = re.search(r'объект долевого строительства:', line)
+
 
                 if number_kadastr == '':
                     if kadastr_nomer: # Если найдено 'Кадастровый номер:' в строке, то записывает в переменную number_kadastr значение
@@ -46,9 +57,19 @@ def get_text(path): # Получаем данные из PDF
                 if object_dole_stroit:  # Если найдено 'объект долевого строительства:' в строке
                     all_dogovor.append(line.split('объект долевого строительства:')[1].strip())
 
+                    if 'данные отсутствуют' in all_dogovor[-1]:
+                        triger = 0
+                        all_data.append(all_dogovor)  # Добавляем в результирующий список - список с данными о договоре
+                        dogovor += 1
+                    else:
+                        if not 'кв.м' in all_dogovor[-1]:
+                            triger = 1
+                        else:
+                            triger = 0
+                            all_data.append(all_dogovor)  # Добавляем в результирующий список - список с данными о договоре
+                            dogovor += 1
 
-                    all_data.append(all_dogovor)  # Добавляем в результирующий список - список с данными о договоре
-                    dogovor += 1
+
 
     return all_data
 
